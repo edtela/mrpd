@@ -72,15 +72,18 @@ RUN code-server --install-extension dbaeumer.vscode-eslint \
     --install-extension ms-vscode.vscode-typescript-next \
     || true
 
-# Copy application files
-COPY --chown=developer:developer startup.sh /home/developer/startup.sh
-COPY --chown=developer:developer railway-init.sh /home/developer/railway-init.sh
-COPY --chown=developer:developer proxy-server.js /home/developer/proxy-server.js
-COPY --chown=developer:developer package.json /home/developer/package.json
-RUN chmod +x /home/developer/startup.sh /home/developer/railway-init.sh
+# Create app directory for our files
+RUN mkdir -p /opt/mrpd && chown developer:developer /opt/mrpd
+
+# Copy application files to /opt/mrpd
+COPY --chown=developer:developer startup.sh /opt/mrpd/startup.sh
+COPY --chown=developer:developer railway-init.sh /opt/mrpd/railway-init.sh
+COPY --chown=developer:developer proxy-server.js /opt/mrpd/proxy-server.js
+COPY --chown=developer:developer package.json /opt/mrpd/package.json
+RUN chmod +x /opt/mrpd/startup.sh /opt/mrpd/railway-init.sh
 
 # Install proxy dependencies
-WORKDIR /home/developer
+WORKDIR /opt/mrpd
 RUN npm install --production
 WORKDIR /workspace
 
@@ -88,4 +91,4 @@ WORKDIR /workspace
 EXPOSE 3000 8080
 
 # Start with railway-init for persistence handling
-CMD ["/home/developer/railway-init.sh"]
+CMD ["/opt/mrpd/railway-init.sh"]

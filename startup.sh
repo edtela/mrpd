@@ -203,4 +203,5 @@ echo "Code-server is running on port ${CODE_SERVER_PORT}"
 
 # Start the proxy server
 echo "Starting proxy server on port ${PROXY_PORT}..."
-PORT=${PROXY_PORT} exec node /home/developer/proxy-server.js
+cd /opt/mrpd
+PORT=${PROXY_PORT} exec node proxy-server.js

@@ -25,4 +25,4 @@ if [ -d "/app" ]; then
 fi
 
 # Run the main startup script
-exec /home/developer/startup.sh
+exec /opt/mrpd/startup.sh
