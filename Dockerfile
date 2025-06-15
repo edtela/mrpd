@@ -2,27 +2,17 @@ FROM ubuntu:22.04
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
-ENV TERM=xterm-256color
 
 # Install base dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
     git \
-    vim \
-    nano \
-    htop \
     build-essential \
     python3 \
     python3-pip \
-    openssh-client \
-    ca-certificates \
-    gnupg \
-    lsb-release \
     sudo \
     locales \
-    tzdata \
-    tmux \
     && rm -rf /var/lib/apt/lists/*
 
 # Generate locale
@@ -36,24 +26,19 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install ripgrep (required by Claude Code)
+# Install ripgrep (required by Claude Code and VS Code search)
 RUN curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep_14.1.0-1_amd64.deb \
     && dpkg -i ripgrep_14.1.0-1_amd64.deb \
     && rm ripgrep_14.1.0-1_amd64.deb
 
-# Install ttyd
-RUN wget https://github.com/tsl0922/ttyd/releases/download/1.7.4/ttyd.x86_64 -O /usr/bin/ttyd \
-    && chmod +x /usr/bin/ttyd
+# Install code-server
+RUN curl -fsSL https://code-server.dev/install.sh | sh
 
 # Install global npm packages
 RUN npm install -g \
     typescript \
     ts-node \
     nodemon \
-    pm2 \
-    pnpm \
-    yarn \
-    npm-check-updates \
     prettier \
     eslint \
     @types/node
@@ -79,18 +64,18 @@ RUN mkdir -p /workspace && chown developer:developer /workspace
 USER developer
 WORKDIR /workspace
 
-# Set up bash
-RUN echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> ~/.bashrc \
-    && echo 'alias ll="ls -alF"' >> ~/.bashrc \
-    && echo 'alias la="ls -A"' >> ~/.bashrc \
-    && echo 'alias l="ls -CF"' >> ~/.bashrc
+# Install VS Code extensions
+RUN code-server --install-extension dbaeumer.vscode-eslint \
+    --install-extension esbenp.prettier-vscode \
+    --install-extension ms-vscode.vscode-typescript-next \
+    || true
 
 # Copy startup script
 COPY --chown=developer:developer startup.sh /home/developer/startup.sh
 RUN chmod +x /home/developer/startup.sh
 
-# Expose ttyd port
-EXPOSE 7681
+# Expose code-server port
+EXPOSE 8080
 
-# Default command to start ttyd
+# Start code-server
 CMD ["/home/developer/startup.sh"]

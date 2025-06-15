@@ -1,28 +1,39 @@
 #!/bin/bash
 
-# This script runs when the container starts
+# Create code-server config directory
+mkdir -p ~/.config/code-server
 
-echo "🚀 Welcome to your cloud development environment!"
-echo ""
-echo "Available tools:"
-echo "  - Claude Code: Run 'claude' to start"
-echo "  - Node.js: $(node --version)"
-echo "  - TypeScript: $(tsc --version)"
-echo "  - Git: $(git --version)"
-echo "  - GitHub CLI: $(gh --version | head -n1)"
-echo ""
-echo "Web terminal is available on port 7681"
-echo ""
+# Configure code-server with authentication
+if [ -n "$PASSWORD" ]; then
+    cat > ~/.config/code-server/config.yaml <<EOF
+bind-addr: 0.0.0.0:8080
+auth: password
+password: ${PASSWORD}
+cert: false
+EOF
+else
+    # Default password if none provided
+    cat > ~/.config/code-server/config.yaml <<EOF
+bind-addr: 0.0.0.0:8080
+auth: password
+password: changeme
+cert: false
+EOF
+    echo "WARNING: Using default password 'changeme'. Set PASSWORD environment variable for security."
+fi
 
-# Terminal theme configuration (GitHub Light theme)
-LIGHT_THEME='{"foreground":"#24292e","background":"#ffffff","cursor":"#24292e","black":"#24292e","red":"#d73a49","green":"#28a745","yellow":"#dbab09","blue":"#0366d6","magenta":"#5a32a3","cyan":"#0598bc","white":"#6a737d","brightBlack":"#959da5","brightRed":"#cb2431","brightGreen":"#22863a","brightYellow":"#b08800","brightBlue":"#005cc5","brightMagenta":"#5a32a3","brightCyan":"#3192aa","brightWhite":"#d1d5da"}'
+# Create VS Code user settings for mobile
+mkdir -p ~/.local/share/code-server/User
+cat > ~/.local/share/code-server/User/settings.json <<EOF
+{
+  "workbench.colorTheme": "Default Light+",
+  "editor.fontSize": 16,
+  "terminal.integrated.fontSize": 16,
+  "editor.wordWrap": "on",
+  "editor.minimap.enabled": false,
+  "window.zoomLevel": 0
+}
+EOF
 
-# Create tmux config for better experience
-echo "set -g mouse on" > ~/.tmux.conf
-echo "set -g history-limit 10000" >> ~/.tmux.conf
-
-# Start ttyd with tmux
-exec ttyd --port 7681 --writable \
-    --client-option fontSize=14 \
-    --client-option "theme=${TERMINAL_THEME:-$LIGHT_THEME}" \
-    tmux new-session -A -s main
+# Start code-server
+exec code-server
