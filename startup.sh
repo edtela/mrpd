@@ -5,6 +5,31 @@ PORT=${PORT:-8080}
 
 echo "Starting code-server on port ${PORT}..."
 
+# Configure GitHub CLI if token is provided
+if [ -n "$GITHUB_TOKEN" ]; then
+    echo "Configuring GitHub CLI authentication..."
+    echo "$GITHUB_TOKEN" | gh auth login --with-token
+    gh auth setup-git
+    
+    # Get GitHub username and email if not already configured
+    if [ -z "$(git config --global user.name)" ]; then
+        GH_USERNAME=$(gh api user -q .login 2>/dev/null)
+        if [ -n "$GH_USERNAME" ]; then
+            git config --global user.name "$GH_USERNAME"
+            GH_EMAIL=$(gh api user -q .email 2>/dev/null)
+            if [ -z "$GH_EMAIL" ] || [ "$GH_EMAIL" = "null" ]; then
+                GH_EMAIL="${GH_USERNAME}@users.noreply.github.com"
+            fi
+            git config --global user.email "$GH_EMAIL"
+            echo "Git configured for user: $GH_USERNAME"
+        fi
+    fi
+    
+    echo "GitHub CLI configured successfully"
+else
+    echo "No GITHUB_TOKEN found. GitHub CLI not configured."
+fi
+
 # Create code-server config directory
 mkdir -p ~/.config/code-server
 
