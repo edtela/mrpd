@@ -5,6 +5,7 @@ A cloud-based development environment with web terminal access, perfect for codi
 ## Features
 
 - **Web Terminal**: Access via ttyd on port 7681
+- **SSH Access**: Native terminal via Termius/SSH (port 2222)
 - **Claude Code**: Pre-installed AI coding assistant
 - **Node.js/TypeScript**: Full development stack
 - **GitHub Integration**: CLI tools included
@@ -23,7 +24,10 @@ A cloud-based development environment with web terminal access, perfect for codi
 3. Add environment variables:
    - `ANTHROPIC_API_KEY`
    - `GITHUB_TOKEN`
+   - `TTYD_USERNAME` and `TTYD_PASSWORD` (for web terminal auth)
+   - `SSH_PUBLIC_KEY` (for SSH access)
 4. Deploy!
+5. Connect via SSH on port 2222 or web on port 7681
 
 ### Deploy to Other Platforms
 The Dockerfile is compatible with most container platforms (Fly.io, Render, etc.)
@@ -54,3 +58,4 @@ The Dockerfile is compatible with most container platforms (Fly.io, Render, etc.
    - Detach: `Ctrl+b d`
    - List sessions: `tmux ls`
    - Reattach: Automatic when reconnecting
+5. **Mobile Access**: See [SSH_SETUP.md](SSH_SETUP.md) for Termius configuration

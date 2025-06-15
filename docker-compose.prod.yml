@@ -8,6 +8,7 @@ services:
     container_name: mrpd-dev-secure
     ports:
       - "7681:7681"  # ttyd web terminal
+      - "2222:22"    # SSH port (using 2222 to avoid conflicts)
     volumes:
       - dev-workspace:/workspace
     environment:
@@ -16,6 +17,7 @@ services:
       - NODE_ENV=production
       - TTYD_USERNAME=${TTYD_USERNAME}
       - TTYD_PASSWORD=${TTYD_PASSWORD}
+      - SSH_PUBLIC_KEY=${SSH_PUBLIC_KEY}
     restart: unless-stopped
     tty: true
     stdin_open: true

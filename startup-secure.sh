@@ -14,6 +14,9 @@ echo ""
 echo "Web terminal is available on port 7681"
 echo ""
 
+# Setup SSH if public key is provided
+/home/developer/setup-ssh.sh
+
 # Terminal theme configuration (GitHub Light theme)
 LIGHT_THEME='{"foreground":"#24292e","background":"#ffffff","cursor":"#24292e","black":"#24292e","red":"#d73a49","green":"#28a745","yellow":"#dbab09","blue":"#0366d6","magenta":"#5a32a3","cyan":"#0598bc","white":"#6a737d","brightBlack":"#959da5","brightRed":"#cb2431","brightGreen":"#22863a","brightYellow":"#b08800","brightBlue":"#005cc5","brightMagenta":"#5a32a3","brightCyan":"#3192aa","brightWhite":"#d1d5da"}'
 

@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y \
     tzdata \
     apache2-utils \
     tmux \
+    openssh-server \
     && rm -rf /var/lib/apt/lists/*
 
 # Generate locale
@@ -86,12 +87,13 @@ RUN echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[0
     && echo 'alias la="ls -A"' >> ~/.bashrc \
     && echo 'alias l="ls -CF"' >> ~/.bashrc
 
-# Copy secure startup script
+# Copy startup scripts
 COPY --chown=developer:developer startup-secure.sh /home/developer/startup-secure.sh
-RUN chmod +x /home/developer/startup-secure.sh
+COPY --chown=developer:developer setup-ssh.sh /home/developer/setup-ssh.sh
+RUN chmod +x /home/developer/startup-secure.sh /home/developer/setup-ssh.sh
 
-# Expose ttyd port
-EXPOSE 7681
+# Expose ports
+EXPOSE 7681 22
 
 # Default command to start ttyd with authentication
 CMD ["/home/developer/startup-secure.sh"]
