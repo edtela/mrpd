@@ -103,5 +103,4 @@ fi
 
 exec code-server \
     --disable-update-check \
-    --user-data-dir /home/developer/.local/share/code-server \
-    --enable-proposed-api
+    --user-data-dir /home/developer/.local/share/code-server
