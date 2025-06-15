@@ -4,6 +4,7 @@
     "builder": "DOCKERFILE",
     "dockerfilePath": "Dockerfile.secure"
   },
+  
   "deploy": {
     "numReplicas": 1,
     "restartPolicyType": "ON_FAILURE",
