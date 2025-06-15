@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  dev-environment:
+    build: 
+      context: .
+      dockerfile: Dockerfile.codeserver
+    container_name: mrpd-codeserver
+    ports:
+      - "8080:8080"  # VS Code Server port
+    volumes:
+      - codeserver-workspace:/workspace
+      - ~/.gitconfig:/home/developer/.gitconfig:ro
+      - ~/.ssh:/home/developer/.ssh:ro
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - NODE_ENV=production
+      - CODE_SERVER_PASSWORD=${CODE_SERVER_PASSWORD}
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+
+volumes:
+  codeserver-workspace:

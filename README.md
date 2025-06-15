@@ -1,22 +1,24 @@
 # MRPD - Mobile Ready Phone Development Environment
 
-A cloud-based development environment with web terminal access, perfect for coding from your phone.
+A cloud-based development environment with VS Code in your browser, perfect for coding from your phone.
 
 ## Features
 
-- **Web Terminal**: Access via ttyd on port 7681
+- **VS Code Server**: Full VS Code in browser (port 8080)
+- **Web Terminal**: Alternative via ttyd (port 7681)
 - **SSH Access**: Native terminal via Termius/SSH (port 2222)
 - **Claude Code**: Pre-installed AI coding assistant
 - **Node.js/TypeScript**: Full development stack
 - **GitHub Integration**: CLI tools included
 - **Docker-based**: Consistent environment everywhere
+- **Mobile Optimized**: Touch-friendly with large fonts
 
 ## Quick Start
 
 ### Local Development
 1. Copy `.env.example` to `.env` and add your API keys
-2. Run: `docker-compose up -d`
-3. Access terminal at: `http://localhost:7681`
+2. Run: `docker-compose -f docker-compose.codeserver.yml up -d`
+3. Access VS Code at: `http://localhost:8080`
 
 ### Deploy to Railway
 1. Fork this repository
@@ -24,10 +26,10 @@ A cloud-based development environment with web terminal access, perfect for codi
 3. Add environment variables:
    - `ANTHROPIC_API_KEY`
    - `GITHUB_TOKEN`
-   - `TTYD_USERNAME` and `TTYD_PASSWORD` (for web terminal auth)
-   - `SSH_PUBLIC_KEY` (for SSH access)
+   - `CODE_SERVER_PASSWORD` (for VS Code auth)
+   - `SSH_PUBLIC_KEY` (optional, for SSH access)
 4. Deploy!
-5. Connect via SSH on port 2222 or web on port 7681
+5. Access VS Code on port 8080
 
 ### Deploy to Other Platforms
 The Dockerfile is compatible with most container platforms (Fly.io, Render, etc.)
@@ -40,14 +42,15 @@ The Dockerfile is compatible with most container platforms (Fly.io, Render, etc.
 - Claude Code CLI
 - GitHub CLI
 - ripgrep, git, vim, nano
-- ttyd web terminal
+- VS Code Server (code-server)
+- ttyd web terminal (alternative)
 - tmux (persistent sessions)
 
 ## Security Notes
 
-- ttyd runs with `--writable` flag for full terminal access
-- Consider adding authentication for production use
+- VS Code Server requires password authentication
 - Store API keys securely as environment variables
+- HTTPS recommended for production use
 
 ## Usage Tips
 
@@ -58,4 +61,5 @@ The Dockerfile is compatible with most container platforms (Fly.io, Render, etc.
    - Detach: `Ctrl+b d`
    - List sessions: `tmux ls`
    - Reattach: Automatic when reconnecting
-5. **Mobile Access**: See [SSH_SETUP.md](SSH_SETUP.md) for Termius configuration
+5. **Mobile Access**: See [CODESERVER.md](CODESERVER.md) for VS Code tips
+6. **SSH Alternative**: See [SSH_SETUP.md](SSH_SETUP.md) for native terminal
