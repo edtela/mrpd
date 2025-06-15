@@ -17,7 +17,11 @@ if [ -d "/app" ]; then
     ln -sfn /app/vscode-config /home/developer/.config
     ln -sfn /app/vscode-local /home/developer/.local
     
-    echo "Persistent storage configured"
+    # Clean up any old code-server config that might cause port conflicts
+    rm -f /home/developer/.config/code-server/config.yaml
+    rm -f /app/vscode-config/code-server/config.yaml
+    
+    echo "Persistent storage configured and cleaned"
 fi
 
 # Run the main startup script

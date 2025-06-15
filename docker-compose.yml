@@ -8,8 +8,8 @@ services:
       - "8080:8080"
     volumes:
       - workspace:/workspace
-      - vscode-config:/home/developer/.config
-      - vscode-local:/home/developer/.local
+      - vscode-config:/home/developer/.config/code-server
+      - vscode-local:/home/developer/.local/share/code-server
       - ~/.gitconfig:/home/developer/.gitconfig:ro
     environment:
       - PASSWORD=${PASSWORD:-changeme}
