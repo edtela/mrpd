@@ -62,6 +62,9 @@ RUN useradd -m -s /bin/bash developer \
 # Create workspace directory
 RUN mkdir -p /workspace && chown developer:developer /workspace
 
+# Create app directory for our files (as root)
+RUN mkdir -p /opt/mrpd && chown developer:developer /opt/mrpd
+
 # Switch to non-root user
 USER developer
 WORKDIR /workspace
@@ -71,9 +74,6 @@ RUN code-server --install-extension dbaeumer.vscode-eslint \
     --install-extension esbenp.prettier-vscode \
     --install-extension ms-vscode.vscode-typescript-next \
     || true
-
-# Create app directory for our files
-RUN mkdir -p /opt/mrpd && chown developer:developer /opt/mrpd
 
 # Copy application files to /opt/mrpd
 COPY --chown=developer:developer proxy-server.js /opt/mrpd/proxy-server.js
