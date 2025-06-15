@@ -1,0 +1,18 @@
+{
+  "name": "MRPD Code Editor",
+  "short_name": "MRPD",
+  "description": "Mobile Ready Phone Development Environment",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#ffffff",
+  "theme_color": "#007ACC",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": "/",
+  "scope": "/"
+}

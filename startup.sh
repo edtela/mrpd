@@ -46,13 +46,48 @@ cat > ~/.local/share/code-server/User/settings.json <<EOF
   "debug.console.fontSize": 16,
   "markdown.preview.fontSize": 18,
   "terminal.integrated.fontWeight": "500",
-  "scm.inputFontSize": 16
+  "scm.inputFontSize": 16,
+  "editor.smoothScrolling": true,
+  "workbench.list.smoothScrolling": true,
+  "terminal.integrated.smoothScrolling": true,
+  "editor.scrollPredominantAxis": false,
+  "editor.multiCursorModifier": "ctrlCmd",
+  "editor.dragAndDrop": false,
+  "workbench.list.multiSelectModifier": "ctrlCmd"
 }
 EOF
 
 # Create a custom CSS file for additional mobile optimizations
 mkdir -p ~/.local/share/code-server
 cat > ~/.local/share/code-server/custom.css <<EOF
+/* Enable smooth touch scrolling */
+* {
+    -webkit-overflow-scrolling: touch !important;
+    scroll-behavior: smooth !important;
+}
+
+/* Improve scrolling performance */
+.monaco-scrollable-element {
+    -webkit-overflow-scrolling: touch !important;
+    will-change: transform !important;
+}
+
+/* Terminal touch scrolling */
+.xterm-viewport {
+    -webkit-overflow-scrolling: touch !important;
+    overflow-y: auto !important;
+}
+
+/* Editor scrolling */
+.monaco-editor .overflow-guard {
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* Sidebar scrolling */
+.monaco-workbench .part.sidebar {
+    -webkit-overflow-scrolling: touch !important;
+}
+
 /* Larger touch targets for mobile */
 .monaco-workbench .part.activitybar > .content .monaco-action-bar .action-item {
     width: 60px !important;
@@ -92,6 +127,19 @@ cat > ~/.local/share/code-server/custom.css <<EOF
     height: 35px !important;
     font-size: 16px !important;
 }
+
+/* Prevent text selection while scrolling */
+.monaco-workbench {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Allow text selection in editor */
+.monaco-editor .view-lines {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+}
 EOF
 
 # Start code-server with mobile optimizations
@@ -103,4 +151,5 @@ fi
 
 exec code-server \
     --disable-update-check \
-    --user-data-dir /home/developer/.local/share/code-server
+    --user-data-dir /home/developer/.local/share/code-server \
+    --disable-telemetry
