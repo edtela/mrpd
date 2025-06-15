@@ -43,6 +43,9 @@ RUN npm install -g \
     eslint \
     @types/node
 
+# Install proxy dependencies
+RUN npm install -g express http-proxy-middleware
+
 # Install Claude Code
 RUN npm install -g @anthropic-ai/claude-code
 
@@ -70,9 +73,10 @@ RUN code-server --install-extension dbaeumer.vscode-eslint \
     --install-extension ms-vscode.vscode-typescript-next \
     || true
 
-# Copy startup scripts
+# Copy startup scripts and proxy server
 COPY --chown=developer:developer startup.sh /home/developer/startup.sh
 COPY --chown=developer:developer railway-init.sh /home/developer/railway-init.sh
+COPY --chown=developer:developer proxy-server.js /home/developer/proxy-server.js
 RUN chmod +x /home/developer/startup.sh /home/developer/railway-init.sh
 
 # Railway will provide PORT env var, but we expose multiple common ports

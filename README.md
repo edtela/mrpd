@@ -4,7 +4,8 @@ VS Code in your browser, optimized for mobile development.
 
 ## Features
 
-- **VS Code Server**: Full VS Code experience in browser
+- **VS Code Server**: Full VS Code at `/dev` path
+- **Development Proxy**: Your app runs on port 3000, accessible at `/`
 - **Mobile Optimized**: Large fonts, touch-friendly interface
 - **Claude Code**: AI assistant pre-installed
 - **Development Tools**: Node.js, TypeScript, Git, GitHub CLI
@@ -40,11 +41,19 @@ Access at: http://localhost:8080
 
 ## Usage
 
-1. Open http://your-domain:8080
+1. Open http://your-domain:8080/dev for VS Code
 2. Enter password
-3. Start coding!
-4. Terminal: Use integrated terminal in VS Code
+3. Start your dev server: `npm start` (runs on port 3000)
+4. View your app at http://your-domain:8080
 5. Claude: Run `claude` in terminal
+
+## Architecture
+
+```
+Port 8080 (Railway/Public)
+    ├── /dev/* → Code-Server (port 8090)
+    └── /* → Your App (port 3000)
+```
 
 ## Mobile Tips
 

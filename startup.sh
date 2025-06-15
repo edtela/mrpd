@@ -1,9 +1,13 @@
 #!/bin/bash
 
-# Use PORT from environment or default to 8080
-PORT=${PORT:-8080}
+# Code-server runs on internal port 8090
+CODE_SERVER_PORT=8090
+# Proxy server uses the PORT env var
+PROXY_PORT=${PORT:-8080}
 
-echo "Starting code-server on port ${PORT}..."
+echo "Starting services..."
+echo "- Code-server on port ${CODE_SERVER_PORT}"
+echo "- Proxy server on port ${PROXY_PORT}"
 
 # Configure GitHub CLI if token is provided
 if [ -n "$GITHUB_TOKEN" ]; then
@@ -35,7 +39,7 @@ mkdir -p ~/.config/code-server
 
 # Create config file
 cat > ~/.config/code-server/config.yaml <<EOF
-bind-addr: 0.0.0.0:${PORT}
+bind-addr: 0.0.0.0:${CODE_SERVER_PORT}
 auth: password
 password: ${PASSWORD:-changeme}
 cert: false
@@ -167,14 +171,21 @@ cat > ~/.local/share/code-server/custom.css <<EOF
 }
 EOF
 
-# Start code-server with mobile optimizations
+# Start code-server in background
 if [ -n "$PASSWORD" ]; then
-    echo "Starting with password authentication..."
+    echo "Starting code-server with password authentication..."
 else
     echo "WARNING: Using default password 'changeme'. Set PASSWORD environment variable for security."
 fi
 
-exec code-server \
+code-server \
     --disable-update-check \
     --user-data-dir /home/developer/.local/share/code-server \
-    --disable-telemetry
+    --disable-telemetry &
+
+# Wait for code-server to start
+sleep 3
+
+# Start the proxy server
+echo "Starting proxy server..."
+exec node /home/developer/proxy-server.js
