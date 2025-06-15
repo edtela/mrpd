@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  dev-environment:
+    build: 
+      context: .
+      dockerfile: Dockerfile.secure
+    container_name: mrpd-dev-secure
+    ports:
+      - "7681:7681"  # ttyd web terminal
+    volumes:
+      - dev-workspace:/workspace
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - NODE_ENV=production
+      - TTYD_USERNAME=${TTYD_USERNAME}
+      - TTYD_PASSWORD=${TTYD_PASSWORD}
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+
+volumes:
+  dev-workspace:

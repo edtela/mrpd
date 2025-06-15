@@ -1,0 +1,95 @@
+FROM ubuntu:22.04
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TERM=xterm-256color
+
+# Install base dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    vim \
+    nano \
+    htop \
+    build-essential \
+    python3 \
+    python3-pip \
+    openssh-client \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    sudo \
+    locales \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
+
+# Generate locale
+RUN locale-gen en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+
+# Install Node.js 20.x
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install ripgrep (required by Claude Code)
+RUN curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep_14.1.0-1_amd64.deb \
+    && dpkg -i ripgrep_14.1.0-1_amd64.deb \
+    && rm ripgrep_14.1.0-1_amd64.deb
+
+# Install ttyd
+RUN wget https://github.com/tsl0922/ttyd/releases/download/1.7.4/ttyd.x86_64 -O /usr/bin/ttyd \
+    && chmod +x /usr/bin/ttyd
+
+# Install global npm packages
+RUN npm install -g \
+    typescript \
+    ts-node \
+    nodemon \
+    pm2 \
+    pnpm \
+    yarn \
+    npm-check-updates \
+    prettier \
+    eslint \
+    @types/node
+
+# Install Claude Code
+RUN npm install -g @anthropic-ai/claude-code
+
+# Install GitHub CLI
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+    && apt-get update \
+    && apt-get install -y gh \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user
+RUN useradd -m -s /bin/bash developer \
+    && echo "developer ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Create workspace directory
+RUN mkdir -p /workspace && chown developer:developer /workspace
+
+# Switch to non-root user
+USER developer
+WORKDIR /workspace
+
+# Set up bash
+RUN echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> ~/.bashrc \
+    && echo 'alias ll="ls -alF"' >> ~/.bashrc \
+    && echo 'alias la="ls -A"' >> ~/.bashrc \
+    && echo 'alias l="ls -CF"' >> ~/.bashrc
+
+# Copy startup script
+COPY --chown=developer:developer startup.sh /home/developer/startup.sh
+RUN chmod +x /home/developer/startup.sh
+
+# Expose ttyd port
+EXPOSE 7681
+
+# Default command to start ttyd
+CMD ["/home/developer/startup.sh"]

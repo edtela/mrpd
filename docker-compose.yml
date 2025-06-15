@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  dev-environment:
+    build: .
+    container_name: mrpd-dev
+    ports:
+      - "7681:7681"  # ttyd web terminal
+    volumes:
+      - ./workspace:/workspace
+      - ~/.gitconfig:/home/developer/.gitconfig:ro
+      - ~/.ssh:/home/developer/.ssh:ro
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - NODE_ENV=development
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
