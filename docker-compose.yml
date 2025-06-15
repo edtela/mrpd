@@ -8,9 +8,11 @@ services:
       - "8080:8080"
     volumes:
       - workspace:/workspace
-      - vscode-config:/home/developer/.config/code-server
-      - vscode-local:/home/developer/.local/share/code-server
+      - vscode-data:/home/developer/.local/share/code-server
+      - git-config:/home/developer/.config/git
+      - gh-config:/home/developer/.config/gh
       - ~/.gitconfig:/home/developer/.gitconfig:ro
+      - ~/.ssh:/home/developer/.ssh:ro
     environment:
       - PASSWORD=${PASSWORD:-changeme}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
@@ -19,5 +21,6 @@ services:
 
 volumes:
   workspace:
-  vscode-config:
-  vscode-local:
+  vscode-data:
+  git-config:
+  gh-config:

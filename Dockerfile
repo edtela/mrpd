@@ -76,11 +76,10 @@ RUN code-server --install-extension dbaeumer.vscode-eslint \
 RUN mkdir -p /opt/mrpd && chown developer:developer /opt/mrpd
 
 # Copy application files to /opt/mrpd
-COPY --chown=developer:developer startup.sh /opt/mrpd/startup.sh
-COPY --chown=developer:developer railway-init.sh /opt/mrpd/railway-init.sh
 COPY --chown=developer:developer proxy-server.js /opt/mrpd/proxy-server.js
 COPY --chown=developer:developer package.json /opt/mrpd/package.json
-RUN chmod +x /opt/mrpd/startup.sh /opt/mrpd/railway-init.sh
+COPY --chown=developer:developer docker-entrypoint.sh /opt/mrpd/docker-entrypoint.sh
+RUN chmod +x /opt/mrpd/docker-entrypoint.sh
 
 # Install proxy dependencies
 WORKDIR /opt/mrpd
@@ -90,5 +89,5 @@ WORKDIR /workspace
 # Railway will provide PORT env var, but we expose multiple common ports
 EXPOSE 3000 8080
 
-# Start with railway-init for persistence handling
-CMD ["/opt/mrpd/railway-init.sh"]
+# The entrypoint handles everything including persistence
+ENTRYPOINT ["/opt/mrpd/docker-entrypoint.sh"]

@@ -76,5 +76,6 @@ Port 8080 (Railway/Public)
 
 **Railway:**
 - Add persistent volume in Railway dashboard
-- Mount to `/app` path
-- All settings and files preserved between deployments
+- Mount to `/home/developer` path
+- All VS Code settings, extensions, and configs preserved
+- See [RAILWAY_PERSISTENCE.md](RAILWAY_PERSISTENCE.md) for details
