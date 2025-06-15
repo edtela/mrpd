@@ -37,6 +37,7 @@ The Dockerfile is compatible with most container platforms (Fly.io, Render, etc.
 - GitHub CLI
 - ripgrep, git, vim, nano
 - ttyd web terminal
+- tmux (persistent sessions)
 
 ## Security Notes
 
@@ -49,3 +50,7 @@ The Dockerfile is compatible with most container platforms (Fly.io, Render, etc.
 1. **From Phone**: Works best with external keyboard or terminal apps
 2. **Claude Code**: Run `claude` to start AI assistant
 3. **Persistence**: Mount volumes for code that survives container restarts
+4. **Session Management**: tmux keeps your session alive when you disconnect
+   - Detach: `Ctrl+b d`
+   - List sessions: `tmux ls`
+   - Reattach: Automatic when reconnecting

@@ -17,8 +17,12 @@ echo ""
 # Terminal theme configuration (GitHub Light theme)
 LIGHT_THEME='{"foreground":"#24292e","background":"#ffffff","cursor":"#24292e","black":"#24292e","red":"#d73a49","green":"#28a745","yellow":"#dbab09","blue":"#0366d6","magenta":"#5a32a3","cyan":"#0598bc","white":"#6a737d","brightBlack":"#959da5","brightRed":"#cb2431","brightGreen":"#22863a","brightYellow":"#b08800","brightBlue":"#005cc5","brightMagenta":"#5a32a3","brightCyan":"#3192aa","brightWhite":"#d1d5da"}'
 
-# Start ttyd with theme
+# Create tmux config for better experience
+echo "set -g mouse on" > ~/.tmux.conf
+echo "set -g history-limit 10000" >> ~/.tmux.conf
+
+# Start ttyd with tmux
 exec ttyd --port 7681 --writable \
     --client-option fontSize=14 \
     --client-option "theme=${TERMINAL_THEME:-$LIGHT_THEME}" \
-    bash
+    tmux new-session -A -s main

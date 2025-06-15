@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
     sudo \
     locales \
     tzdata \
+    tmux \
     && rm -rf /var/lib/apt/lists/*
 
 # Generate locale
