@@ -34,16 +34,8 @@ else
     echo "No GITHUB_TOKEN found. GitHub CLI not configured."
 fi
 
-# Create code-server config directory
-mkdir -p ~/.config/code-server
-
-# Create config file
-cat > ~/.config/code-server/config.yaml <<EOF
-bind-addr: 0.0.0.0:${CODE_SERVER_PORT}
-auth: password
-password: ${PASSWORD:-changeme}
-cert: false
-EOF
+# Remove any existing code-server config to avoid conflicts
+rm -f ~/.config/code-server/config.yaml
 
 # Create VS Code user settings for mobile with larger fonts
 mkdir -p ~/.local/share/code-server/User
@@ -183,8 +175,16 @@ else
     echo "WARNING: Using default password 'changeme'. Set PASSWORD environment variable for security."
 fi
 
+# Set password for code-server
+if [ -n "$PASSWORD" ]; then
+    export PASSWORD=$PASSWORD
+else
+    export PASSWORD=changeme
+fi
+
 code-server \
     --bind-addr 0.0.0.0:${CODE_SERVER_PORT} \
+    --auth password \
     --disable-update-check \
     --user-data-dir /home/developer/.local/share/code-server \
     --disable-telemetry &
