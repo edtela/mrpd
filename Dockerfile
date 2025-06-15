@@ -74,8 +74,11 @@ RUN code-server --install-extension dbaeumer.vscode-eslint \
 COPY --chown=developer:developer startup.sh /home/developer/startup.sh
 RUN chmod +x /home/developer/startup.sh
 
-# Expose code-server port
-EXPOSE 8080
+# Default port (Railway will override with PORT env var)
+ENV PORT=8080
+
+# Expose port
+EXPOSE ${PORT}
 
 # Start code-server
 CMD ["/home/developer/startup.sh"]
