@@ -8,7 +8,7 @@ VS Code in your browser, optimized for mobile development.
 - **Mobile Optimized**: Large fonts, touch-friendly interface
 - **Claude Code**: AI assistant pre-installed
 - **Development Tools**: Node.js, TypeScript, Git, GitHub CLI
-- **Persistent Workspace**: Code saved in /workspace directory
+- **Persistent Storage**: VS Code settings and workspace preserved
 
 ## Quick Start
 
@@ -57,3 +57,15 @@ Access at: http://localhost:8080
 - If fonts still too small: 
   - Use browser zoom (pinch to zoom)
   - Or adjust in Settings > Editor: Font Size
+
+## Persistence
+
+**Local (docker-compose):**
+- Workspace files: Named volume `workspace`
+- VS Code settings: Named volumes `vscode-config` and `vscode-local`
+- Survives container restarts
+
+**Railway:**
+- Add persistent volume in Railway dashboard
+- Mount to `/app` path
+- All settings and files preserved between deployments

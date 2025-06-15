@@ -7,10 +7,17 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./workspace:/workspace
+      - workspace:/workspace
+      - vscode-config:/home/developer/.config
+      - vscode-local:/home/developer/.local
       - ~/.gitconfig:/home/developer/.gitconfig:ro
     environment:
       - PASSWORD=${PASSWORD:-changeme}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
     restart: unless-stopped
+
+volumes:
+  workspace:
+  vscode-config:
+  vscode-local:

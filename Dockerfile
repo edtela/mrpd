@@ -70,12 +70,13 @@ RUN code-server --install-extension dbaeumer.vscode-eslint \
     --install-extension ms-vscode.vscode-typescript-next \
     || true
 
-# Copy startup script
+# Copy startup scripts
 COPY --chown=developer:developer startup.sh /home/developer/startup.sh
-RUN chmod +x /home/developer/startup.sh
+COPY --chown=developer:developer railway-init.sh /home/developer/railway-init.sh
+RUN chmod +x /home/developer/startup.sh /home/developer/railway-init.sh
 
 # Railway will provide PORT env var, but we expose multiple common ports
 EXPOSE 3000 8080
 
-# Start code-server
-CMD ["/home/developer/startup.sh"]
+# Start with railway-init for persistence handling
+CMD ["/home/developer/railway-init.sh"]
