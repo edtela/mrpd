@@ -171,6 +171,11 @@ cat > ~/.local/share/code-server/custom.css <<EOF
 }
 EOF
 
+# Kill any existing processes on our ports
+pkill -f "code-server" || true
+pkill -f "node.*proxy-server" || true
+sleep 1
+
 # Start code-server in background
 if [ -n "$PASSWORD" ]; then
     echo "Starting code-server with password authentication..."
@@ -179,13 +184,23 @@ else
 fi
 
 code-server \
+    --bind-addr 0.0.0.0:${CODE_SERVER_PORT} \
     --disable-update-check \
     --user-data-dir /home/developer/.local/share/code-server \
     --disable-telemetry &
 
 # Wait for code-server to start
-sleep 3
+echo "Waiting for code-server to start..."
+sleep 5
+
+# Verify code-server is running
+if ! curl -s http://localhost:${CODE_SERVER_PORT} > /dev/null; then
+    echo "Error: code-server failed to start"
+    exit 1
+fi
+
+echo "Code-server is running on port ${CODE_SERVER_PORT}"
 
 # Start the proxy server
-echo "Starting proxy server..."
-exec node /home/developer/proxy-server.js
+echo "Starting proxy server on port ${PROXY_PORT}..."
+PORT=${PROXY_PORT} exec node /home/developer/proxy-server.js
