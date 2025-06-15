@@ -49,6 +49,11 @@ Access at: http://localhost:8080
 ## Mobile Tips
 
 - Add to home screen for app-like experience
-- Use landscape orientation
-- External keyboard recommended
-- Pinch to zoom works
+- Use landscape orientation for coding
+- External keyboard recommended (or use on-screen)
+- Settings optimized: 20px editor font, 18px terminal
+- Touch-friendly: larger buttons and touch targets
+- Sidebar on right side for easier thumb access
+- If fonts still too small: 
+  - Use browser zoom (pinch to zoom)
+  - Or adjust in Settings > Editor: Font Size
