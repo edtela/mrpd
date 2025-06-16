@@ -1,6 +1,17 @@
 #!/bin/bash
 
 # This entrypoint handles the persistent/non-persistent directory split
+# 
+# Directory structure:
+# - /home/developer (persistent volume) - User's actual work files and git configs
+#   - Git configuration (.gitconfig)
+#   - GitHub CLI authentication
+#   - User's VS Code settings (optional)
+#   - User's project files in /workspace
+# - /opt/mrpd (container filesystem) - Application runtime files
+#   - code-server config and data
+#   - proxy server application
+#   - All non-user configuration
 
 # Code-server runs on internal port 8090
 export CODE_SERVER_PORT=8090
@@ -36,9 +47,9 @@ else
     echo "No GITHUB_TOKEN found. GitHub CLI not configured."
 fi
 
-# VS Code settings are fine in persistent home
-# Just make sure no code-server config.yaml exists
-rm -f ~/.config/code-server/config.yaml
+# Create config and data directories in /opt/mrpd
+mkdir -p /opt/mrpd/config/code-server
+mkdir -p /opt/mrpd/code-server-data
 
 # Kill any existing processes on our ports
 pkill -f "code-server" || true
@@ -52,9 +63,20 @@ if [ -z "$PASSWORD" ]; then
     echo "WARNING: Using default password 'changeme'. Set PASSWORD environment variable for security."
 fi
 
+# Create a minimal config to prevent code-server from creating its own
+cat > /opt/mrpd/config/code-server/config.yaml << EOF
+bind-addr: 0.0.0.0:${CODE_SERVER_PORT}
+auth: password
+password: ${PASSWORD}
+cert: false
+EOF
+
+# Set code-server data directory to /opt/mrpd to avoid home directory
+export SERVICE_USER_DATA_DIR=/opt/mrpd/code-server-data
+
 code-server \
-    --bind-addr 0.0.0.0:${CODE_SERVER_PORT} \
-    --auth password \
+    --config /opt/mrpd/config/code-server/config.yaml \
+    --user-data-dir /opt/mrpd/code-server-data \
     --disable-update-check \
     --disable-telemetry &
 
