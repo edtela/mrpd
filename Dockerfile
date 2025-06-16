@@ -54,6 +54,11 @@ RUN mkdir -p /opt/mrpd && chown -R developer:developer /opt/mrpd
 USER developer
 WORKDIR /opt/mrpd
 
+# Configure npm to use user directory for global packages
+ENV NPM_CONFIG_PREFIX=/home/developer/.npm-global
+ENV PATH=$NPM_CONFIG_PREFIX/bin:$PATH
+RUN mkdir -p /home/developer/.npm-global
+
 # Install code-server
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/opt/mrpd
 

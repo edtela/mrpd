@@ -3,6 +3,9 @@ set -e
 
 echo "Starting MRPD (Mobile Remote Programming Desktop)..."
 
+# Ensure npm global bin directory is in PATH
+export PATH="/home/developer/.npm-global/bin:$PATH"
+
 # Create necessary directories if they don't exist
 mkdir -p /home/developer/.local/share/code-server/User
 mkdir -p /home/developer/.config/code-server

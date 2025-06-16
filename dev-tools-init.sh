@@ -5,6 +5,9 @@
 # Create useful aliases for mobile development
 cat >> /home/developer/.bashrc << 'EOF'
 
+# Ensure npm global packages are in PATH
+export PATH="/home/developer/.npm-global/bin:$PATH"
+
 # Claude Code aliases
 alias claude='claude-code'
 alias cc='claude-code'
