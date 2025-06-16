@@ -84,6 +84,8 @@ echo "Waiting for code-server to start..."
 sleep 5
 
 # Start the proxy server
+# Debug: show what PORT is set to
+echo "PORT environment variable is: ${PORT}"
 echo "Starting proxy server on port ${PORT:-8000}..."
 cd /opt/mrpd
 exec node proxy-server.js
