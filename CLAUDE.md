@@ -5,9 +5,9 @@
 MRPD (Mobile Remote Programming Desktop) is a cloud-based development environment designed for coding from mobile devices. It provides a full VS Code experience through code-server, accessible via any web browser.
 
 The system consists of:
-- **VS Code Server (code-server)** - Running on port 8080 internally
-- **Proxy Server** - Running on port 8000 (or Railway's PORT), routing:
-  - `/dev/*` → VS Code interface
+- **VS Code Server (code-server)** - Running on port 8081 internally
+- **Proxy Server** - Running on Railway's PORT (or 8000 locally), routing:
+  - `/dev/*` → VS Code interface (port 8081)
   - `/` → Your development server (port 3000)
 
 ## Architecture

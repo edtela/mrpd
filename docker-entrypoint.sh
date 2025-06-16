@@ -23,16 +23,15 @@ if [ ! -f "/home/developer/.tmux.conf" ]; then
     cp /opt/mrpd/tmux.conf /home/developer/.tmux.conf
 fi
 
-# Create code-server config if it doesn't exist
-if [ ! -f "$CODE_SERVER_CONFIG" ]; then
-    echo "Creating code-server configuration..."
-    cat > "$CODE_SERVER_CONFIG" <<EOF
-bind-addr: 127.0.0.1:8080
+# Create code-server config to ensure it uses port 8081
+echo "Creating code-server configuration..."
+mkdir -p $(dirname "$CODE_SERVER_CONFIG")
+cat > "$CODE_SERVER_CONFIG" <<EOF
+bind-addr: 127.0.0.1:8081
 auth: password
 password: ${PASSWORD:-changeme}
 cert: false
 EOF
-fi
 
 # Configure git global settings if not already configured
 if [ ! -f "/home/developer/.gitconfig" ]; then
@@ -70,9 +69,14 @@ if [ ! -f "/home/developer/.mrpd-dev-tools-initialized" ]; then
 fi
 
 # Start code-server in the background
-echo "Starting code-server on port 8080..."
+echo "Starting code-server on port 8081..."
+# Export PASSWORD for code-server to use
+export PASSWORD="${PASSWORD:-changeme}"
+# Use --disable-update-check to prevent config file auto-creation
 /opt/mrpd/bin/code-server \
-    --config "$CODE_SERVER_CONFIG" \
+    --bind-addr 127.0.0.1:8081 \
+    --auth password \
+    --disable-update-check \
     --user-data-dir /home/developer/.local/share/code-server \
     --extensions-dir /home/developer/.local/share/code-server/extensions \
     /home/developer/workspace &

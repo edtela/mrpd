@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 8000;
 
 // Proxy configuration for code-server (VS Code)
 const codeServerProxy = createProxyMiddleware({
-  target: 'http://localhost:8080',
+  target: 'http://localhost:8081',
   changeOrigin: true,
   ws: true,
   pathRewrite: {
