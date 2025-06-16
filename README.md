@@ -1,81 +1,70 @@
-# MRPD - Mobile Ready Phone Development
+# MRPD - Mobile Remote Programming Desktop
 
-VS Code in your browser, optimized for mobile development.
+A cloud-based VS Code development environment optimized for mobile devices, designed to run on Railway with persistent storage.
 
 ## Features
 
-- **VS Code Server**: Full VS Code at `/dev` path
-- **Development Proxy**: Your app runs on port 3000, accessible at `/`
-- **Mobile Optimized**: Large fonts, touch-friendly interface
-- **Claude Code**: AI assistant pre-installed
-- **Development Tools**: Node.js, TypeScript, Git, GitHub CLI
-- **Persistent Storage**: VS Code settings and workspace preserved
+- **Mobile-Optimized Interface**: Larger fonts, touch-friendly UI elements, and mobile keyboard fixes
+- **Persistent Terminal Sessions**: tmux integration ensures terminals survive browser disconnects
+- **Dual Server Architecture**: VS Code on `/dev/*` and your app on `/`
+- **Persistent Storage**: All user files and settings survive redeployments
+- **GitHub Integration**: Optional GitHub CLI authentication support
 
 ## Quick Start
 
-### Local
+### Deploy to Railway
+
+1. Fork this repository
+2. Connect to Railway and create a new project
+3. Add a persistent volume mounted at `/home/developer`
+4. Set environment variables:
+   - `PASSWORD`: Your code-server password
+   - `GITHUB_TOKEN`: (Optional) For GitHub CLI authentication
+5. Deploy!
+
+### Local Development
+
 ```bash
-cp .env.example .env
-# Edit .env with your password and API keys
-docker-compose up -d
+# Clone the repository
+git clone https://github.com/yourusername/mrpd.git
+cd mrpd
+
+# Run with Docker Compose
+docker-compose up
+
+# Access at http://localhost:8000/dev
 ```
-Access at: http://localhost:8080
-
-### Railway
-1. Fork this repo
-2. Connect to Railway
-3. Set environment variables:
-   - `PASSWORD` (required)
-   - `ANTHROPIC_API_KEY` (for Claude)
-   - `GITHUB_TOKEN` (for GitHub CLI)
-4. Deploy!
-
-## What's Included
-
-- Ubuntu 22.04
-- Node.js 20.x
-- TypeScript, ESLint, Prettier
-- Claude Code CLI
-- GitHub CLI
-- VS Code extensions (ESLint, Prettier, TypeScript)
 
 ## Usage
 
-1. Open http://your-domain:8080/dev for VS Code
-2. Enter password
-3. Start your dev server: `npm start` (runs on port 3000)
-4. View your app at http://your-domain:8080
-5. Claude: Run `claude` in terminal
-
-## Architecture
-
-```
-Port 8080 (Railway/Public)
-    ├── /dev/* → Code-Server (port 8090)
-    └── /* → Your App (port 3000)
-```
+1. **Access VS Code**: Navigate to `https://your-app.railway.app/dev`
+2. **Start Development**: Create your project in `/home/developer/workspace`
+3. **Run Your App**: Start your dev server on port 3000
+4. **View Your App**: Access at `https://your-app.railway.app/`
 
 ## Mobile Tips
 
-- Add to home screen for app-like experience
-- Use landscape orientation for coding
-- External keyboard recommended (or use on-screen)
-- Settings optimized: 20px editor font, 18px terminal
-- Touch-friendly: larger buttons and touch targets
-- Sidebar on right side for easier thumb access
-- If fonts still too small: 
-  - Use browser zoom (pinch to zoom)
-  - Or adjust in Settings > Editor: Font Size
+- Use external keyboard when possible for best experience
+- Terminal sessions persist - use tmux shortcuts (Ctrl+a)
+- Pinch to zoom is supported
+- Copy/paste works with touch selection
 
-## Persistence
+## Environment Variables
 
-**Local (docker-compose):**
-- Workspace files: Named volume `workspace`
-- VS Code settings: Named volumes `vscode-config` and `vscode-local`
-- Survives container restarts
+### Required
+- `PASSWORD`: Authentication password for code-server
 
-**Railway:**
-- Add persistent volume in Railway dashboard
-- Mount to `/home/developer` path
-- All VS Code settings, extensions, and configs preserved
-- See [CLAUDE.md](CLAUDE.md) for important architecture notes
+### Optional
+- `GITHUB_TOKEN`: GitHub personal access token for CLI authentication
+- `ANTHROPIC_API_KEY`: API key for Claude Code
+- `GIT_USER_NAME`: Your name for git commits (default: "Developer")
+- `GIT_USER_EMAIL`: Your email for git commits (default: "developer@mrpd.local")
+- `PORT`: HTTP port (automatically provided by Railway)
+
+## Architecture
+
+See [CLAUDE.md](CLAUDE.md) for detailed architecture and development notes.
+
+## License
+
+MIT

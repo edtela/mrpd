@@ -1,26 +1,16 @@
 version: '3.8'
 
 services:
-  codeserver:
+  mrpd:
     build: .
-    container_name: mrpd
     ports:
-      - "8080:8080"
-    volumes:
-      - workspace:/workspace
-      - vscode-data:/home/developer/.local/share/code-server
-      - git-config:/home/developer/.config/git
-      - gh-config:/home/developer/.config/gh
-      - ~/.gitconfig:/home/developer/.gitconfig:ro
-      - ~/.ssh:/home/developer/.ssh:ro
+      - "8000:8000"
     environment:
-      - PASSWORD=${PASSWORD:-changeme}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - PASSWORD=changeme
+      - PORT=8000
+    volumes:
+      - developer-home:/home/developer
     restart: unless-stopped
 
 volumes:
-  workspace:
-  vscode-data:
-  git-config:
-  gh-config:
+  developer-home:

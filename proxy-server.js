@@ -1,101 +1,55 @@
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+
 const app = express();
+const PORT = process.env.PORT || 8000;
 
-const PORT = process.env.PORT || 8080;
-const CODE_SERVER_PORT = 8090;
-const DEV_SERVER_PORT = 3000;
-
-// Health check endpoint for Railway
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
+// Proxy configuration for code-server (VS Code)
+const codeServerProxy = createProxyMiddleware({
+  target: 'http://localhost:8080',
+  changeOrigin: true,
+  ws: true,
+  pathRewrite: {
+    '^/dev': ''
+  },
+  logLevel: 'warn'
 });
 
-// Proxy /dev/* to code-server
-app.use('/dev', createProxyMiddleware({
-  target: `http://localhost:${CODE_SERVER_PORT}`,
-  pathRewrite: { '^/dev': '' },
-  ws: true,
+// Proxy configuration for user's development server
+const devServerProxy = createProxyMiddleware({
+  target: 'http://localhost:3000',
   changeOrigin: true,
-  logLevel: 'debug',
-  onProxyReq: (proxyReq, req, res) => {
-    // Handle authentication headers if needed
-    if (req.headers.cookie) {
-      proxyReq.setHeader('Cookie', req.headers.cookie);
-    }
-  },
-  onError: (err, req, res) => {
-    console.error('Code-server proxy error:', err);
-    res.status(502).send('Code-server is starting up...');
-  }
-}));
-
-// Proxy everything else to dev server on port 3000
-app.use('/', createProxyMiddleware({
-  target: `http://localhost:${DEV_SERVER_PORT}`,
   ws: true,
-  changeOrigin: true,
-  logLevel: 'debug',
+  logLevel: 'warn',
+  // Don't fail if dev server is not running
   onError: (err, req, res) => {
-    console.error('Dev server proxy error:', err);
-    res.status(200).send(`
-      <!DOCTYPE html>
+    console.log('Dev server not running on port 3000');
+    res.status(502).send(`
       <html>
-      <head>
-        <title>MRPD - Development Environment</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            text-align: center;
-          }
-          h1 { color: #007ACC; }
-          .button {
-            display: inline-block;
-            padding: 15px 30px;
-            margin: 10px;
-            background: #007ACC;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 18px;
-          }
-          .info {
-            background: #f0f0f0;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-          }
-          code {
-            background: #e0e0e0;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-size: 16px;
-          }
-        </style>
-      </head>
-      <body>
-        <h1>Welcome to MRPD</h1>
-        <div class="info">
-          <p>Your development server is not running yet.</p>
-          <p>Start your app on port <code>3000</code> to see it here.</p>
-        </div>
-        <a href="/dev" class="button">Open VS Code</a>
-        <p style="margin-top: 30px; color: #666;">
-          In the VS Code terminal, run:<br>
-          <code>cd /workspace && npm start</code>
-        </p>
-      </body>
+        <body style="font-family: system-ui, sans-serif; padding: 40px; text-align: center;">
+          <h1>Development Server Not Running</h1>
+          <p>Start your development server on port 3000 to see your application here.</p>
+          <p>Access VS Code at <a href="/dev">/dev</a></p>
+        </body>
       </html>
     `);
   }
-}));
+});
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'mrpd-proxy' });
+});
+
+// Route /dev/* to code-server
+app.use('/dev', codeServerProxy);
+
+// Route everything else to the development server
+app.use('/', devServerProxy);
+
+// Start the server
 app.listen(PORT, () => {
-  console.log(`Proxy server running on port ${PORT}`);
-  console.log(`- Code-server: http://localhost:${PORT}/dev`);
-  console.log(`- Dev server: http://localhost:${PORT}/`);
+  console.log(`MRPD Proxy Server running on port ${PORT}`);
+  console.log(`- VS Code: http://localhost:${PORT}/dev`);
+  console.log(`- Dev Server: http://localhost:${PORT}/`);
 });

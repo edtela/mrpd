@@ -3,17 +3,25 @@ FROM ubuntu:22.04
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install base dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
-    wget \
     git \
+    wget \
+    sudo \
+    vim \
+    tmux \
     build-essential \
     python3 \
     python3-pip \
-    sudo \
     locales \
-    procps \
+    openssh-client \
+    gnupg \
+    ca-certificates \
+    lsb-release \
+    jq \
+    ripgrep \
+    fd-find \
     && rm -rf /var/lib/apt/lists/*
 
 # Generate locale
@@ -22,72 +30,67 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
-# Install Node.js 20.x
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+# Install Node.js 18
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install ripgrep (required by Claude Code and VS Code search)
-RUN curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep_14.1.0-1_amd64.deb \
-    && dpkg -i ripgrep_14.1.0-1_amd64.deb \
-    && rm ripgrep_14.1.0-1_amd64.deb
-
-# Install code-server
-RUN curl -fsSL https://code-server.dev/install.sh | sh
-
-# Install global npm packages
-RUN npm install -g \
-    typescript \
-    ts-node \
-    nodemon \
-    prettier \
-    eslint \
-    @types/node
-
-
-# Install Claude Code
-RUN npm install -g @anthropic-ai/claude-code
-
 # Install GitHub CLI
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-    && apt-get update \
-    && apt-get install -y gh \
+    && apt update \
+    && apt install gh -y \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user
-RUN useradd -m -s /bin/bash developer \
+# Create developer user with sudo privileges
+RUN useradd -m -s /bin/bash -u 1000 developer \
     && echo "developer ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# Create workspace directory
-RUN mkdir -p /workspace && chown developer:developer /workspace
+# Create application directory structure BEFORE switching user
+RUN mkdir -p /opt/mrpd && chown -R developer:developer /opt/mrpd
 
-# Create app directory for our files (as root)
-RUN mkdir -p /opt/mrpd && chown developer:developer /opt/mrpd
-
-# Switch to non-root user
+# Switch to developer user
 USER developer
-WORKDIR /workspace
-
-# Install VS Code extensions
-RUN code-server --install-extension dbaeumer.vscode-eslint \
-    --install-extension esbenp.prettier-vscode \
-    --install-extension ms-vscode.vscode-typescript-next \
-    || true
-
-# Copy application files to /opt/mrpd
-COPY --chown=developer:developer proxy-server.js /opt/mrpd/proxy-server.js
-COPY --chown=developer:developer package.json /opt/mrpd/package.json
-COPY --chown=developer:developer docker-entrypoint.sh /opt/mrpd/docker-entrypoint.sh
-RUN chmod +x /opt/mrpd/docker-entrypoint.sh
-
-# Install proxy dependencies
 WORKDIR /opt/mrpd
-RUN npm install --production
-WORKDIR /workspace
 
-# Railway will provide PORT env var, but we expose multiple common ports
-EXPOSE 3000 8080
+# Install code-server
+RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/opt/mrpd
 
-# The entrypoint handles everything including persistence
+# Install global npm packages including Claude Code
+RUN npm install -g \
+    @anthropic-ai/claude-code \
+    typescript \
+    eslint \
+    prettier \
+    nodemon
+
+# Copy package files and install dependencies
+COPY --chown=developer:developer package*.json ./
+RUN npm install
+
+# Copy application files
+COPY --chown=developer:developer proxy-server.js ./
+COPY --chown=developer:developer docker-entrypoint.sh ./
+COPY --chown=developer:developer default-settings.json ./
+COPY --chown=developer:developer tmux.conf ./
+COPY --chown=developer:developer dev-tools-init.sh ./
+
+# Make scripts executable
+RUN chmod +x docker-entrypoint.sh dev-tools-init.sh
+
+# Create necessary directories
+RUN mkdir -p /home/developer/.config/code-server \
+    && mkdir -p /home/developer/workspace
+
+# Set up code-server config directory
+ENV CODE_SERVER_CONFIG=/opt/mrpd/code-server-config.yaml
+
+# Expose ports
+EXPOSE 8000
+
+# Set working directory to home for runtime
+WORKDIR /home/developer
+
+# Entry point
 ENTRYPOINT ["/opt/mrpd/docker-entrypoint.sh"]

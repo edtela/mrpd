@@ -1,96 +1,86 @@
 #!/bin/bash
+set -e
 
-# This entrypoint handles the persistent/non-persistent directory split
-# 
-# Directory structure:
-# - /home/developer (persistent volume) - User's actual work files and git configs
-#   - Git configuration (.gitconfig)
-#   - GitHub CLI authentication
-#   - User's VS Code settings (optional)
-#   - User's project files in /workspace
-# - /opt/mrpd (container filesystem) - Application runtime files
-#   - code-server config and data
-#   - proxy server application
-#   - All non-user configuration
+echo "Starting MRPD (Mobile Remote Programming Desktop)..."
 
-# Code-server runs on internal port 8090
-export CODE_SERVER_PORT=8090
-# Proxy server uses the PORT env var
-export PROXY_PORT=${PORT:-8080}
+# Create necessary directories if they don't exist
+mkdir -p /home/developer/.local/share/code-server/User
+mkdir -p /home/developer/.config/code-server
+mkdir -p /home/developer/workspace
 
-echo "Starting services..."
-echo "- Code-server on port ${CODE_SERVER_PORT}"
-echo "- Proxy server on port ${PROXY_PORT}"
-
-# Configure GitHub CLI if token is provided (this can be in persistent home)
-if [ -n "$GITHUB_TOKEN" ]; then
-    echo "Configuring GitHub CLI authentication..."
-    echo "$GITHUB_TOKEN" | gh auth login --with-token
-    gh auth setup-git
-    
-    # Get GitHub username and email if not already configured
-    if [ -z "$(git config --global user.name)" ]; then
-        GH_USERNAME=$(gh api user -q .login 2>/dev/null)
-        if [ -n "$GH_USERNAME" ]; then
-            git config --global user.name "$GH_USERNAME"
-            GH_EMAIL=$(gh api user -q .email 2>/dev/null)
-            if [ -z "$GH_EMAIL" ] || [ "$GH_EMAIL" = "null" ]; then
-                GH_EMAIL="${GH_USERNAME}@users.noreply.github.com"
-            fi
-            git config --global user.email "$GH_EMAIL"
-            echo "Git configured for user: $GH_USERNAME"
-        fi
-    fi
-    
-    echo "GitHub CLI configured successfully"
-else
-    echo "No GITHUB_TOKEN found. GitHub CLI not configured."
+# Copy default VS Code settings if they don't exist (first run)
+if [ ! -f "/home/developer/.local/share/code-server/User/settings.json" ]; then
+    echo "First run detected - copying default mobile-friendly settings..."
+    cp /opt/mrpd/default-settings.json /home/developer/.local/share/code-server/User/settings.json
 fi
 
-# Create config and data directories in /opt/mrpd
-mkdir -p /opt/mrpd/config/code-server
-mkdir -p /opt/mrpd/code-server-data
-
-# Kill any existing processes on our ports
-pkill -f "code-server" || true
-pkill -f "node.*proxy-server" || true
-sleep 1
-
-# Start code-server in background with command line args only
-echo "Starting code-server..."
-if [ -z "$PASSWORD" ]; then
-    export PASSWORD=changeme
-    echo "WARNING: Using default password 'changeme'. Set PASSWORD environment variable for security."
+# Copy tmux config if it doesn't exist
+if [ ! -f "/home/developer/.tmux.conf" ]; then
+    echo "Setting up tmux configuration..."
+    cp /opt/mrpd/tmux.conf /home/developer/.tmux.conf
 fi
 
-# Create a minimal config to prevent code-server from creating its own
-cat > /opt/mrpd/config/code-server/config.yaml << EOF
-bind-addr: 0.0.0.0:${CODE_SERVER_PORT}
+# Create code-server config if it doesn't exist
+if [ ! -f "$CODE_SERVER_CONFIG" ]; then
+    echo "Creating code-server configuration..."
+    cat > "$CODE_SERVER_CONFIG" <<EOF
+bind-addr: 127.0.0.1:8080
 auth: password
-password: ${PASSWORD}
+password: ${PASSWORD:-changeme}
 cert: false
 EOF
+fi
 
-# Set code-server data directory to /opt/mrpd to avoid home directory
-export SERVICE_USER_DATA_DIR=/opt/mrpd/code-server-data
+# Configure git global settings if not already configured
+if [ ! -f "/home/developer/.gitconfig" ]; then
+    echo "Setting up git configuration..."
+    git config --global user.name "${GIT_USER_NAME:-Developer}"
+    git config --global user.email "${GIT_USER_EMAIL:-developer@mrpd.local}"
+    git config --global init.defaultBranch main
+    git config --global pull.rebase false
+    git config --global core.editor "code-server --wait"
+fi
 
-code-server \
-    --config /opt/mrpd/config/code-server/config.yaml \
-    --user-data-dir /opt/mrpd/code-server-data \
-    --disable-update-check \
-    --disable-telemetry &
+# Configure GitHub CLI if GITHUB_TOKEN is provided
+if [ -n "$GITHUB_TOKEN" ]; then
+    echo "Configuring GitHub CLI..."
+    echo "$GITHUB_TOKEN" | gh auth login --with-token 2>/dev/null || true
+    # Configure git to use gh for authentication
+    gh auth setup-git 2>/dev/null || true
+fi
+
+# Configure Claude Code if API key is provided
+if [ -n "$ANTHROPIC_API_KEY" ]; then
+    echo "Claude Code API key detected - will be available for use"
+    # Claude Code uses ANTHROPIC_API_KEY environment variable automatically
+fi
+
+# Create SSH directory if it doesn't exist
+mkdir -p /home/developer/.ssh
+chmod 700 /home/developer/.ssh
+
+# Run development tools initialization if not already done
+if [ ! -f "/home/developer/.mrpd-dev-tools-initialized" ]; then
+    echo "Initializing development tools..."
+    /opt/mrpd/dev-tools-init.sh
+    touch /home/developer/.mrpd-dev-tools-initialized
+fi
+
+# Start code-server in the background
+echo "Starting code-server on port 8080..."
+/opt/mrpd/bin/code-server \
+    --config "$CODE_SERVER_CONFIG" \
+    --user-data-dir /home/developer/.local/share/code-server \
+    --extensions-dir /home/developer/.local/share/code-server/extensions \
+    /home/developer/workspace &
+
+CODE_SERVER_PID=$!
 
 # Wait for code-server to start
 echo "Waiting for code-server to start..."
-for i in {1..10}; do
-    if curl -s http://localhost:${CODE_SERVER_PORT} > /dev/null; then
-        echo "Code-server is running on port ${CODE_SERVER_PORT}"
-        break
-    fi
-    sleep 1
-done
+sleep 5
 
-# Start the proxy server from the app directory
-echo "Starting proxy server on port ${PROXY_PORT}..."
+# Start the proxy server
+echo "Starting proxy server on port ${PORT:-8000}..."
 cd /opt/mrpd
 exec node proxy-server.js
