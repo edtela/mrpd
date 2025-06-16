@@ -89,8 +89,7 @@ RUN chmod +x docker-entrypoint.sh dev-tools-init.sh
 RUN mkdir -p /home/developer/.config/code-server \
     && mkdir -p /home/developer/workspace
 
-# Set up code-server config directory
-ENV CODE_SERVER_CONFIG=/opt/mrpd/code-server-config.yaml
+# Don't use config file - will use command line args only
 
 # Expose ports
 EXPOSE 8000

@@ -23,15 +23,7 @@ if [ ! -f "/home/developer/.tmux.conf" ]; then
     cp /opt/mrpd/tmux.conf /home/developer/.tmux.conf
 fi
 
-# Create code-server config to ensure it uses port 8081
-echo "Creating code-server configuration..."
-mkdir -p $(dirname "$CODE_SERVER_CONFIG")
-cat > "$CODE_SERVER_CONFIG" <<EOF
-bind-addr: 127.0.0.1:8081
-auth: password
-password: ${PASSWORD:-changeme}
-cert: false
-EOF
+# We'll create the code-server config later, after checking the volume
 
 # Configure git global settings if not already configured
 if [ ! -f "/home/developer/.gitconfig" ]; then
@@ -67,6 +59,16 @@ if [ ! -f "/home/developer/.mrpd-dev-tools-initialized" ]; then
     /opt/mrpd/dev-tools-init.sh
     touch /home/developer/.mrpd-dev-tools-initialized
 fi
+
+# Create code-server config to use port 8081 (do this every time to override any defaults)
+echo "Configuring code-server to use port 8081..."
+mkdir -p /home/developer/.config/code-server
+cat > /home/developer/.config/code-server/config.yaml <<EOF
+bind-addr: 127.0.0.1:8081
+auth: password
+password: ${PASSWORD:-changeme}
+cert: false
+EOF
 
 # Start code-server in the background
 echo "Starting code-server on port 8081..."
