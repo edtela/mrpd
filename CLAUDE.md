@@ -4,11 +4,7 @@
 
 MRPD (Mobile Remote Programming Desktop) is a cloud-based development environment designed for coding from mobile devices. It provides a full VS Code experience through code-server, accessible via any web browser.
 
-The system consists of:
-- **VS Code Server (code-server)** - Running on port 8081 internally
-- **Proxy Server** - Running on Railway's PORT (or 8000 locally), routing:
-  - `/dev/*` → VS Code interface (port 8081)
-  - `/` → Your development server (port 3000)
+The system runs code-server directly on the PORT provided by the hosting platform (Railway or local).
 
 ## Architecture
 
@@ -32,10 +28,10 @@ The system consists of:
   - Any user data that should persist
 
 - **`/opt/mrpd`** (CONTAINER FILESYSTEM - rebuilt each deployment)
-  - Application scripts (`docker-entrypoint.sh`, `proxy-server.js`)
+  - Application scripts (`docker-entrypoint.sh`)
   - Runtime configurations
-  - code-server config and data
-  - Node modules for proxy server
+  - code-server installation
+  - Default settings and configurations
   - **ALL SCRIPTS AND CONFIGS MUST GO HERE**
 
 ## Critical Notes for Development
@@ -87,10 +83,10 @@ The image includes:
 
 ## Development Workflow
 
-1. Access VS Code at `https://your-app.railway.app/dev`
-2. Your files persist in `/workspace` (part of home directory)
-3. Start your dev server on port 3000
-4. Access your app at `https://your-app.railway.app/`
+1. Access VS Code at `https://your-app.railway.app/`
+2. Your files persist in `/home/developer/workspace`
+3. Use the integrated terminal for all development tasks
+4. All development tools are pre-installed and configured
 
 ## Mobile/Touch-Friendly Configuration
 
@@ -100,7 +96,6 @@ The system includes mobile-optimized default settings that are copied to the use
 - **Default settings location**: `/opt/mrpd/default-settings.json`
 - **User settings location**: `/home/developer/.local/share/code-server/User/settings.json`
 - **First-run behavior**: Defaults are copied if user settings don't exist (checked at container startup)
-- **"First run" means**: Either the very first deployment OR any deployment where the settings file doesn't exist in the persistent volume
 
 ### Mobile Optimizations Include:
 - Larger terminal font size (16px) for better readability
@@ -108,7 +103,7 @@ The system includes mobile-optimized default settings that are copied to the use
 - Increased editor font size
 - Simplified UI for smaller screens
 - Touch gesture support
-- Mobile keyboard workarounds (e.g., ctrl+c terminal fix)
+- Mobile keyboard workarounds
 - Wider scrollbars for touch interaction
 - Disabled minimap for more screen space
 
@@ -123,20 +118,20 @@ Special attention to terminal usability on mobile:
 To prevent loss of terminal sessions when browser disconnects (critical for mobile):
 
 - **tmux integration**: All terminals automatically use tmux sessions
-- **Session naming**: Each workspace gets its own tmux session (e.g., `vscode-projectname`)
+- **Session naming**: Each workspace gets its own tmux session
 - **Auto-attach**: Reopening terminals reconnects to existing sessions
 - **Benefits**:
   - Terminal sessions survive browser refresh/close
   - Long-running processes continue in background
   - Command history preserved across sessions
   - Essential for unstable mobile connections
-- **Configuration**: VS Code terminal profile set to use tmux by default
 - **tmux config**: Mouse support, increased scrollback, user-friendly keybindings
 
-## Testing Commands
+## Local Development
 
-When making changes, always test with:
+To run locally:
 ```bash
-npm run lint
-npm run typecheck
+docker-compose up --build
 ```
+
+Then access code-server at http://localhost:8080 with password "changeme".

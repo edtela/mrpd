@@ -30,7 +30,7 @@
   
   "keyboard.dispatch": "keyCode",
   
-  "workbench.activityBar.visible": true,
+  "workbench.activityBar.visible": false,
   "workbench.sideBar.location": "left",
   "workbench.statusBar.visible": true,
   "workbench.tree.indent": 20,

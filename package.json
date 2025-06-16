@@ -1,31 +1,19 @@
 {
   "name": "mrpd",
   "version": "1.0.0",
-  "description": "Mobile Remote Programming Desktop - Cloud-based development environment optimized for mobile devices",
-  "main": "proxy-server.js",
+  "description": "Mobile Remote Programming Desktop - Cloud-based development environment",
   "scripts": {
-    "start": "node proxy-server.js",
-    "dev": "nodemon proxy-server.js",
-    "lint": "eslint proxy-server.js",
-    "typecheck": "tsc --noEmit"
+    "start": "echo 'Use docker-compose up to start the service'"
   },
   "keywords": [
     "code-server",
+    "vscode",
     "mobile",
     "development",
     "cloud-ide"
   ],
-  "author": "",
+  "author": "MRPD Team",
   "license": "MIT",
-  "dependencies": {
-    "express": "^4.18.2",
-    "http-proxy-middleware": "^2.0.6"
-  },
-  "devDependencies": {
-    "eslint": "^8.56.0",
-    "nodemon": "^3.0.2",
-    "typescript": "^5.3.3"
-  },
   "engines": {
     "node": ">=18.0.0"
   }

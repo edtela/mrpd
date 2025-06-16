@@ -1,72 +1,73 @@
 # MRPD - Mobile Remote Programming Desktop
 
-A cloud-based VS Code development environment optimized for mobile devices, designed to run on Railway with persistent storage.
-
-## Features
-
-- **Mobile-Optimized Interface**: Larger fonts, touch-friendly UI elements, and mobile keyboard fixes
-- **Persistent Terminal Sessions**: tmux integration ensures terminals survive browser disconnects
-- **Dual Server Architecture**: VS Code on `/dev/*` and your app on `/`
-- **Persistent Storage**: All user files and settings survive redeployments
-- **GitHub Integration**: Optional GitHub CLI authentication support
-- **PWA Support**: Install as a mobile app for full-screen experience
+A cloud-based VS Code development environment optimized for mobile devices, powered by code-server.
 
 ## Quick Start
 
-### Deploy to Railway
-
-1. Fork this repository
-2. Connect to Railway and create a new project
-3. Add a persistent volume mounted at `/home/developer`
-4. Set environment variables:
-   - `PASSWORD`: Your code-server password
-   - `GITHUB_TOKEN`: (Optional) For GitHub CLI authentication
-5. Deploy!
-
 ### Local Development
 
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/mrpd.git
-cd mrpd
+1. Clone this repository
+2. Run with Docker Compose:
+   ```bash
+   docker-compose up --build
+   ```
+3. Access VS Code at http://localhost:8080
+4. Login with password: `changeme`
 
-# Run with Docker Compose
-docker-compose up
+### Deploy to Railway
 
-# Access at http://localhost:8000/dev
-```
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/mrpd)
 
-## Usage
+1. Click the button above
+2. Set environment variables:
+   - `PASSWORD` (required) - Your login password
+   - `GITHUB_TOKEN` (optional) - For GitHub CLI authentication
+   - `ANTHROPIC_API_KEY` (optional) - For Claude Code AI assistant
+   - `GIT_USER_NAME` (optional) - Your git commit name
+   - `GIT_USER_EMAIL` (optional) - Your git commit email
+3. Add a persistent volume mounted at `/home/developer`
+4. Deploy!
 
-1. **Access VS Code**: Navigate to `https://your-app.railway.app/dev`
-2. **Start Development**: Create your project in `/home/developer/workspace`
-3. **Run Your App**: Start your dev server on port 3000
-4. **View Your App**: Access at `https://your-app.railway.app/`
+## Features
 
-## Mobile Tips
-
-- **Install as App**: Visit the site → Share/Menu → Add to Home Screen
-- Use external keyboard when possible for best experience
-- Terminal sessions persist - use tmux shortcuts (Ctrl+a)
-- Pinch to zoom is supported
-- Copy/paste works with touch selection
+- **Full VS Code in your browser** - Complete development environment
+- **Mobile-optimized** - Touch-friendly UI, larger fonts, better scrollbars
+- **Persistent workspace** - Your files survive container restarts
+- **Pre-installed tools**:
+  - Git & GitHub CLI
+  - Claude Code AI assistant
+  - Node.js, TypeScript, ESLint, Prettier
+  - tmux for persistent terminal sessions
+  - ripgrep and fd for fast file searching
+- **Bash aliases** - Shortcuts for common commands
+- **Auto-configuration** - Git, GitHub CLI, and Claude Code set up automatically
 
 ## Environment Variables
 
-### Required
-- `PASSWORD`: Authentication password for code-server
-
-### Optional
-- `GITHUB_TOKEN`: GitHub personal access token for CLI authentication
-- `ANTHROPIC_API_KEY`: API key for Claude Code
-- `GIT_USER_NAME`: Your name for git commits (default: "Developer")
-- `GIT_USER_EMAIL`: Your email for git commits (default: "developer@mrpd.local")
-- `PORT`: HTTP port (automatically provided by Railway)
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `PASSWORD` | Yes | Password for code-server authentication |
+| `PORT` | Auto | Automatically set by Railway |
+| `GITHUB_TOKEN` | No | GitHub personal access token for CLI |
+| `ANTHROPIC_API_KEY` | No | API key for Claude Code |
+| `GIT_USER_NAME` | No | Default git commit author name |
+| `GIT_USER_EMAIL` | No | Default git commit author email |
 
 ## Architecture
 
-See [CLAUDE.md](CLAUDE.md) for detailed architecture and development notes.
+- **code-server** runs directly on the PORT provided by Railway
+- **/home/developer** is persisted as a volume mount
+- **/opt/mrpd** contains all application files
+- Mobile-friendly VS Code settings are applied on first run
 
-## License
+## Tips for Mobile Development
 
-MIT
+- Use the integrated terminal with tmux for persistent sessions
+- Bash aliases make typing easier: `gs` (git status), `ga` (git add), etc.
+- Claude Code is available as `claude` or `cc` command
+- Touch and hold for right-click context menus
+- Pinch to zoom works in the editor
+
+## Support
+
+For issues and feature requests, please use the GitHub issues page.
