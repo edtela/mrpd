@@ -74,6 +74,10 @@ EOF
 echo "Starting code-server on port 8081..."
 # Export PASSWORD for code-server to use
 export PASSWORD="${PASSWORD:-changeme}"
+# Save PORT for proxy server later
+PROXY_PORT="${PORT:-8000}"
+# Unset PORT so code-server doesn't use it
+unset PORT
 # Use --disable-update-check to prevent config file auto-creation
 /opt/mrpd/bin/code-server \
     --bind-addr 127.0.0.1:8081 \
@@ -90,8 +94,8 @@ echo "Waiting for code-server to start..."
 sleep 5
 
 # Start the proxy server
-# Debug: show what PORT is set to
-echo "PORT environment variable is: ${PORT}"
-echo "Starting proxy server on port ${PORT:-8000}..."
+# Restore PORT for proxy server
+export PORT="${PROXY_PORT}"
+echo "Starting proxy server on port ${PORT}..."
 cd /opt/mrpd
 exec node proxy-server.js
