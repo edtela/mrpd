@@ -9,6 +9,7 @@ A cloud-based VS Code development environment optimized for mobile devices, desi
 - **Dual Server Architecture**: VS Code on `/dev/*` and your app on `/`
 - **Persistent Storage**: All user files and settings survive redeployments
 - **GitHub Integration**: Optional GitHub CLI authentication support
+- **PWA Support**: Install as a mobile app for full-screen experience
 
 ## Quick Start
 
@@ -44,6 +45,7 @@ docker-compose up
 
 ## Mobile Tips
 
+- **Install as App**: Visit the site → Share/Menu → Add to Home Screen
 - Use external keyboard when possible for best experience
 - Terminal sessions persist - use tmux shortcuts (Ctrl+a)
 - Pinch to zoom is supported

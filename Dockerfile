@@ -80,6 +80,7 @@ COPY --chown=developer:developer docker-entrypoint.sh ./
 COPY --chown=developer:developer default-settings.json ./
 COPY --chown=developer:developer tmux.conf ./
 COPY --chown=developer:developer dev-tools-init.sh ./
+COPY --chown=developer:developer manifest.json ./
 
 # Make scripts executable
 RUN chmod +x docker-entrypoint.sh dev-tools-init.sh
